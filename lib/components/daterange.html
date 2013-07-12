@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+
+<html>
+  <body>
+    <element name="x-date-range" constructor="DateRange" extends="div" apply-author-styles>
+      <template>
+        <div class="input-value-wrapper">
+          <div class="wrapper">
+            <span class="value-display">{{displayValue}}</span>
+          </div>
+          <div id="calendarsHolder">
+            <div class="wrapper">
+              <template instantiate="for calendar calendarsList"></template>
+            </div>
+          </div>
+        </div>
+      </template>
+      <script type="application/dart" src="daterange.dart"></script>
+      <style>
+        .hidden{ display:none !important; }
+        .input-value-wrapper {
+          display: inline-block;
+          min-width: 200px;
+          border: 1px #e5e5e5 solid;
+          border-radius: 4px;
+          position: relative;
+        }
+        .input-value-wrapper .wrapper {
+          padding: 3px;
+        }
+      </style> 
+    </element>
+  </body>
+</html>
