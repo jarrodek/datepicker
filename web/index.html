@@ -3,18 +3,21 @@
   <head>
     <meta charset="utf-8">
     <title>Date Picker</title>
-    <link rel="import" href="packages/datepicker/components/xdateinput.html">
+    <!-- link rel="import" href="packages/datepicker/components/xdateinput.html" -->
     <link rel="import" href="packages/datepicker/components/daterange.html">
   </head>
   <body>
     <label for="date1">Date1</label>
-    <xdateinput id="xdate1" inputid="date1" value="{{date1}}"></xdateinput>
     
+    <!--xdateinput locale="pl" id="xdate1" inputid="date1" value="2013-07-01"></xdateinput-->
+    
+    <x-date-range locale="pl" limitright="{{dateRangeRight}}"></x-date-range>
     <br/>
     <br/>
     <br/>
-    <br/>
-    <x-date-range></x-date-range>
+    <img src="c.png" alt="CCCCCCCCCCC" style="margin-top: 78px;">
+    
+    
     
     
     

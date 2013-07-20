@@ -2,69 +2,108 @@
 
 <html>
   <body>
-    <element name="xdateinput" constructor="XDateInput" extends="span" apply-author-styles>
+    <element name="xdateinput" constructor="XDateInput" extends="div" apply-author-styles>
       <template>        
-        <span class="xdateinput_parent">
+        <div class="xdateinput_parent">
           <template if="showDiv && initialized">
-            <div class="xdateinput_datePicker {{closing?'xdateinput_closing':''}}">         
-              <div class="xdateinput_yearMonth">
-                <button class="xdateinput_button" on-click="previousMonth()">&larr;</button>
-                {{monthText}}
-                <button class="xdateinput_button" on-click="nextMonth()">&rarr;</button>
-                <button class="xdateinput_button" on-click="previousYear()">&larr;</button>
-                {{date.year}}
-                <button class="xdateinput_button" on-click="nextYear()">&rarr;</button>                
-              </div>
-              <div>
-                <table>
-                  <thead>
-                    <tr template iterate="weekday in weekdayTexts">
-                      <th class="xdateinput_weekday">{{weekday}}</th>
-                    </tr>
-                  </thead>
-                  <tbody template iterate="weekList in calendarList">
-                    <tr template iterate="day in weekList">
-                      <td class="xdateinput_day">
-                        <template if="day!=null">
-                          <div class="xdateinput_selectable{{isToday(day)?' xdateinput_selected':''}}" on-click="chooseDay(day)">{{day}}</div>
-                        </template>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+            <div class="xdateinput_datePicker {{closing?'xdateinput_closing':''}}">
+              <div class="xdate_container">
+                <div class="month-row">
+                  <button class="xdateinput_button prev" on-click="previousMonth()"></button>
+                  <span class="month-txt">{{monthText}}</span>
+                  <span class="year-txt">{{_view_date.year}}</span>
+                  <button class="xdateinput_button next" on-click="nextMonth()"></button>
+                </div>
+                
+                <!-- div class="xdateinput_yearMonth">
+                  <butto class="xdateinput_button" on-click="previousMonth()">&larr;</button>
+                  {{monthText}}
+                  <button class="xdateinput_button" on-click="nextMonth()">&rarr;</button>
+                  <button class="xdateinput_button" on-click="previousYear()">&larr;</button>
+                  {{date.year}}
+                  <button class="xdateinput_button" on-click="nextYear()">&rarr;</button>                
+                </div -->
+                
+                
+                <div>
+                  <table>
+                    <thead>
+                      <tr template iterate="weekday in weekdayTexts">
+                        <th class="xdateinput_weekday">{{weekday}}</th>
+                      </tr>
+                    </thead>
+                    <tbody template iterate="weekList in calendarList">
+                      <tr template iterate="day in weekList">
+                        <td class="xdateinput_day">
+                          <template if="day != null">
+                            <div class="xdateinput_selectable{{isToday(day) ? ' xdateinput_today' : ''}}" on-click="chooseDay(day)">{{day}}</div>
+                          </template>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              
               </div>
             </div>
           </template>          
-        </span>
-        <input id="{{inputid}}" type="text" on-focus="show()" on-blur="close()" bind-value="value" on-change="onValueChange()" placeholder="{{inputplaceholder}}" maxlength="{{inputmaxlength}}">
+        </div>
+        
+        <input id="{{inputid}}" type="text" on-focus="show()" bind-value="value" on-change="onValueChange()" placeholder="{{inputplaceholder}}" maxlength="{{inputmaxlength}}">
       </template>
       <script type="application/dart" src="xdateinput.dart"></script>
       <style>
+table {
+  border-spacing: 0;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+tbody td {
+  border: 1px #F7F7F7 solid;
+}
 .xdateinput_parent{
   display:inline-block;
   position:relative;
 }
 .xdateinput_datePicker{
-  position:absolute;
-  margin-top:10px;
-  position:absolute;
-  padding:5px 5px 5px 5px;
-  z-index:999;
-  border:1px solid;
-  background-color:#fff;
+  position: absolute;
+  z-index: 999;
+  background-color: #fff;
+  top: 6px;
+  left: 6px;
+}
+.xdate_container {
+  margin: 5px 0px;
+  background-color: #fff;
+  padding: 5px 0;
+}
+.month-row {
+  font-size: 12px;
+  text-align: center;
+  background-color: #e5e5e5;
 }
 .xdateinput_selected{
   font-weight:bold;
   border:1px solid;
+  background-color: #0077cc;
+  color: #fff;
+}
+.xdateinput_selectable {
+  padding: 3px 2px;
+  cursor: pointer;
 }
 .xdateinput_selectable:hover{
-  cursor:pointer;
+  background-color: #fc3;
 }
 .xdateinput_day{
   text-align:center;
 }
 .xdateinput_weekday{
-  text-align:center;
+  text-align: center;
+  border-bottom: 1px #D1D1D1 solid;
+  margin: 8px;
+  padding: 5px;
+  color: #252525;
 }
 .xdateinput_yearMonth{
   text-align:center;
@@ -74,16 +113,31 @@
   text-align:right;
 }
 .xdateinput_button{
-  display:inline;
+  display: inline-block;
+  background-color: #DADADA;
+  border: 1px #AFAFAF solid;
+  outline: none;
+  cursor: pointer;
+  background-repeat: no-repeat;
+  width: 10px;
+  height: 13px;
+  background-position: 50% 50%;
+  background-size: initial;
 }
-.xdateinput_button:hover{
-  cursor:pointer;
+.xdateinput_button.next{
+  background-image: url(data:image/gif;base64,R0lGODlhBAAHAPABAGZmZgAAACH5BAEAAAEALAAAAAAEAAcAAAIIRA4WaeyrVCgAOw==);
 }
-.xdateinput_closing{
-  opacity:0;
-  transition-property:opacity;
-  transition-duration:0.5s;
+.xdateinput_button.prev{
+  background-image: url(data:image/gif;base64,R0lGODlhBAAHAPABAGZmZgAAACH5BAEAAAEALAAAAAAEAAcAAAIIjHEIy7ppAigAOw==);
 }
+.xdateinput_day {
+  padding: 0;
+  margin: 0;
+}
+.xdateinput_today{
+  font-weight:bold;
+}
+
       </style>
     </element>
   </body>
