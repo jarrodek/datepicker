@@ -31,7 +31,7 @@
                           <td class="dr_day">
                             <template if="day != null">
                               <template if="calendar.isSelectable(day)">
-                                <div class="dr_selectable" on-click="selectDay(calendar.year,calendar.month,day)">{{day}}</div>
+                                <div class="dr_selectable{{isSelected(calendar.year,calendar.month,day) ? ' dr_selected' : ''}}" on-click="selectDay(calendar.year,calendar.month,day)">{{day}}</div>
                               </template>
                               <template if="!calendar.isSelectable(day)">
                                 <div class="dr_selectable_void">{{day}}</div>
@@ -61,9 +61,9 @@
                 </select>
               </div>
               <div class="dr_range_inputs">
-                <input id="rangeInputStart" type="text"/>
+                <input bind-value="startDateInput" id="rangeInputStart" type="text"/>
                 <span class="dr_pause">-</span>
-                <input id="rangeInputEnd" type="text"/>
+                <input bind-value="endDateInput" id="rangeInputEnd" type="text"/>
               </div>
               <div class="dr_options_actions">
                 <button class="dr_button apply" on-click="apply()">Apply</button>
@@ -115,7 +115,6 @@
         }
         .dr_selected{
           font-weight:bold;
-          border:1px solid;
           background-color: #0077cc;
           color: #fff;
         }

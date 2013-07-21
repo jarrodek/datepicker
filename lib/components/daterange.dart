@@ -11,26 +11,58 @@ import 'package:intl/intl.dart';
 class DateRange extends WebComponent{
   @observable bool initialized = false;
   ///Value to be displayed in display
-  String get displayValue => (dateFormat == null || startDate == null || endDate == null) ? '' : '${dateFormat.format(startDate)} - ${dateFormat.format(endDate)}';
+  String get displayValue => (_dateFormat == null || startDate == null || endDate == null) ? '' : '${_dateFormat.format(startDate)} - ${_dateFormat.format(endDate)}';
   /// Display date format
-  @observable DateFormat dateFormat;
+  @observable DateFormat _dateFormat = new DateFormat.yMd();
   /// Current locale
-  @observable String _locale = 'en';
+  @observable String _locale;
   String get locale => _locale;
   set locale(String l){
     _locale = l;
-    initializeDateFormatting(locale, null)
+    
+    initializeDateFormatting(_locale, null)
+      .then((_) => _dateFormat = new DateFormat.yMd(_locale))
       .then((_) => _initializeTexts(new DateFormat.E().dateSymbols));
   }
   
   @observable int firstDayOfWeek;
   @observable static List<String> monthTexts;
   @observable static List<String> weekdayTexts;
-  DateFormat _format = new DateFormat.yMd();
   set format(String f) => new DateFormat(f,locale);
+  
+  /// Currently selected (but not accepted) start day
+  @observable DateTime selectedStartDate;
+  /// Currently selected (but not accepted) end day
+  @observable DateTime selectedEndDate;
   
   @observable DateTime startDate = new DateTime.now();
   @observable DateTime endDate = new DateTime.now();
+   
+  String _startDateInput;
+  String _endDateInput;
+  String get startDateInput => _startDateInput == null ? _dateFormat.format(selectedStartDate) : _startDateInput;
+  String get endDateInput => _endDateInput == null ? selectedEndDate == null ? '' : _dateFormat.format(selectedEndDate) : _endDateInput;
+  
+  set startDateInput(String v){
+    try{
+      selectedStartDate = _dateFormat.parse(v);
+      _startDateInput = v; //_dateFormat.format(selectedStartDate);
+      startDate = selectedStartDate;
+    }catch(e){
+      print('Formated string: $v, locale: $locale');
+      print(e);
+    }
+  }
+  set endDateInput(String v){
+    try{
+      selectedEndDate = _dateFormat.parse(v);
+      _endDateInput = v;
+      endDate = selectedEndDate;
+    }catch(e){
+      print('Formated string: $v, locale: $locale');
+      print(e);
+    }
+  }
   
   /// Limit selector to dates before [limitright] date (exclusive).
   DateTime limitright;
@@ -41,31 +73,29 @@ class DateRange extends WebComponent{
   @observable List<AppCalendar> get  calendarsList => _calendarsData();
   
   DateRange(){
-    locale = window.navigator.language;
-    initializeDateFormatting(window.navigator.language, null).then((_){
-      dateFormat = new DateFormat.yMMMMd(window.navigator.language); 
-    });
+    DateTime d = new DateTime.now();
+    selectedStartDate = new DateTime(d.year, d.month, d.day);
+    selectedEndDate = new DateTime(d.year, d.month, d.day);
   }
+    
   
-  @observable DateTime startMonth;
   List<AppCalendar> _calendarsData(){
     if(!initialized) return [];
     
     List<AppCalendar> result = [];
-    if(startMonth == null){
-      if(startDate.month == endDate.month){
-        //startDate.month must be in the middle
-        startMonth = new DateTime(startDate.year, startDate.month-1, 1).subtract(new Duration(days:1));
-      } else if(endDate.month-startDate.month == 2){
-        startMonth = startDate;
-      } else {
-        startMonth = new DateTime(startDate.year, startDate.month+1, 1).subtract(new Duration(days:1));
-      }
+    
+    if(startDate.month == endDate.month){
+      //startDate.month must be in the middle
+      startDate = new DateTime(startDate.year, startDate.month-1, 1).subtract(new Duration(days:1));
+    } else if(endDate.month-startDate.month == 2){
+    } else {
+      startDate = new DateTime(startDate.year, startDate.month+1, 1).subtract(new Duration(days:1));
     }
+    
     for(int i=0; i<calendars; i++){
       
-      int y = startMonth.year;
-      int m = startMonth.month;
+      int y = startDate.year;
+      int m = startDate.month;
       m += i;
       if(m==13){
         m = 1;
@@ -147,14 +177,10 @@ class DateRange extends WebComponent{
   }
   
   void created(){
-    if(locale != null){
-      initializeDateFormatting(locale, null)
+    findSystemLocale()
+      .then((_) => initializeDateFormatting(Intl.systemLocale, null))
+      .then((_) => _dateFormat = new DateFormat.yMd(Intl.systemLocale))
       .then((_) => _initializeTexts(new DateFormat.E().dateSymbols));
-    } else {
-      findSystemLocale()
-        .then((_) => initializeDateFormatting(Intl.systemLocale, null))
-        .then((_) => _initializeTexts(new DateFormat.E().dateSymbols));
-    }
   }
   void _initializeTexts(DateSymbols ds){
     firstDayOfWeek = ds.FIRSTDAYOFWEEK;
@@ -169,24 +195,49 @@ class DateRange extends WebComponent{
     initialized = true;
   }
   
-  
-  
-  
-  
-  void inserted() {
-    if(locale != null){
-      initializeDateFormatting(locale, null)
-        .then((_) => _format = new DateFormat.yMd(locale))
-        .then((_) => _initializeTexts(new DateFormat.E(locale).dateSymbols));
-    }
-  }
-  
   void previousMonth(){
-    startMonth = new DateTime(startMonth.year, startMonth.month-1, startMonth.day);
+    startDate = new DateTime(startDate.year, startDate.month-1, startDate.day);
   }
   
   void nextMonth(){
-    startMonth = new DateTime(startMonth.year, startMonth.month+1, startMonth.day);
+    startDate = new DateTime(startDate.year, startDate.month+1, startDate.day);
+  }
+  
+  bool firstDaySelected = false;
+  void selectDay(int year, int month, int day){
+    DateTime d = new DateTime(year, month, day);
+    if(firstDaySelected){
+      selectedEndDate = d;
+      firstDaySelected = false;
+    } else {
+      selectedEndDate = null;
+      selectedStartDate = d;
+      firstDaySelected = true;
+    }
+  }
+  
+  bool isSelected(int year, int month, int day){
+    DateTime current = new DateTime(year, month, day);
+    
+    if(selectedStartDate == null){
+      return false;
+    }
+    
+    if(current.isAtSameMomentAs(selectedStartDate)){
+      return true;
+    }
+    
+    if(current.isAfter(selectedStartDate)){
+      //check left bound
+      if(selectedEndDate == null){
+        return false;
+      }
+      if(current.isBefore(selectedEndDate) || current.isAtSameMomentAs(selectedEndDate)){
+        return true;
+      }
+    }
+    return false;
+    
   }
 }
 
