@@ -4,9 +4,12 @@
     <element name="x-date-range" constructor="DateRange" extends="div" apply-author-styles>
       <template>
         <div class="dr_input-value-wrapper">
-          <div class="dr_wrapper">
+          <div class="dr_wrapper" on-click="show($event)">
             <span class="dr_value-display">{{displayValue}}</span>
           </div>
+          
+          <template if="showing">
+          
           <div id="dr_calendarsHolder">
             <div class="dr_wrapper">
               
@@ -52,26 +55,26 @@
             <div class="dr_options-container">
               <div class="dr_presets">
                 <span class="dr_label">Date range</span>
-                <select class="dr_select">
-                  <option>Custom</option>
-                  <option>Today</option>
-                  <option>Yesterday</option>
-                  <option>Last week</option>
-                  <option>Last month</option>
+                <select id="DrPresetOption" on-change="presetRange($event)" class="dr_select">
+                  <option value="custom">Custom</option>
+                  <option value="today">Today</option>
+                  <option value="yesterday">Yesterday</option>
+                  <option value="last-week">Last week</option>
+                  <option value="last-month">Last month</option>
                 </select>
               </div>
-              <div class="dr_range_inputs">
-                <input bind-value="startDateInput" id="rangeInputStart" type="text"/>
+              <div class="dr_range_inputs{{inputRangeCss}}">
+                <input on-change="rangeInputsChange($event)" on-focus="setAsCustomSelection()" bind-value="startDateInput" id="rangeInputStart" type="text"/>
                 <span class="dr_pause">-</span>
-                <input bind-value="endDateInput" id="rangeInputEnd" type="text"/>
+                <input on-change="rangeInputsChange($event)" on-focus="setAsCustomSelection()"  bind-value="endDateInput" id="rangeInputEnd" type="text"/>
               </div>
               <div class="dr_options_actions">
-                <button class="dr_button apply" on-click="apply()">Apply</button>
-                <a href="about:blank" target="_blank" on-click="cancel()" class="dr_cancel">Cancel</a>
+                <button class="dr_button apply" on-click="apply($event)">Apply</button>
+                <a href="about:blank" target="_blank" on-click="cancel($event)" class="dr_cancel">Cancel</a>
               </div>
             </div>
           </div>
-          
+          </template>
         </div>
       </template>
       <script type="application/dart" src="daterange.dart"></script>
@@ -107,6 +110,12 @@
           background-color: #fff;
           padding: 0;
           float: left;
+          -webkit-touch-callout: none;
+          -webkit-user-select: none;
+          -khtml-user-select: none;
+          -moz-user-select: moz-none;
+          -ms-user-select: none;
+          user-select: none;
         }
         .dr_month-row {
           font-size: 12px;
@@ -210,6 +219,11 @@
         .dr_button.apply {
           width: 67px;
           height: 22px;
+        }
+        .dr_range_inputs.disabled input {
+          color: gray;
+          outline: none;
+          border-top-width: 1px;
         }
         .dr_clearfix:before, .dr_clearfix:after { content: ""; display: table; }
         .dr_clearfix:after { clear: both; }

@@ -11,7 +11,7 @@
     
     <!--xdateinput locale="pl" id="xdate1" inputid="date1" value="2013-07-01"></xdateinput-->
     
-    <x-date-range locale="pl" limitright="{{dateRangeRight}}"></x-date-range>
+    <x-date-range on-change="callbackAction($event)" locale="pl" showing="{{true}}" selectionstart="{{dateSelectionLeft}}" selectionend="{{dateSelectionRight}}" limitright="{{dateRangeRight}}"></x-date-range>
     <br/>
     <br/>
     <br/>
